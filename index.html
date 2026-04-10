@@ -124,7 +124,7 @@ a:hover { color: var(--primary-700); }
   gap: 10px;
 }
 
-.sidebar-brand h1 svg { flex-shrink: 0; }
+.sidebar-brand h1 svg { flex-shrink: 0; width: 24px; height: 24px; }
 
 .sidebar-brand p {
   font-size: 12px;
@@ -1098,7 +1098,7 @@ function seedData() {
     d.setHours(9 + Math.floor(Math.random()*8), Math.floor(Math.random()*60));
     return d.toISOString();
   };
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = formatDate(today.toISOString());
 
   const customers = [
     { id: 'c1', name: '上海锐创科技有限公司', contact: '王建国', phone: '13800138001', company: '锐创科技', address: '上海市浦东新区张江高科技园区', createdAt: day(-30) },
@@ -1890,7 +1890,7 @@ window.handleOrderSubmit = function(e, editId) {
       showToast('订单已更新');
     }
   } else {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = formatDate(new Date().toISOString());
     const todayDateCompact = todayStr.replace(/-/g, '');
     const todayOrders = orders.filter(o => o.orderNo && o.orderNo.includes(todayDateCompact));
     const maxSeq = todayOrders.reduce((max, o) => {
