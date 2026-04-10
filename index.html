@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>订单管理系统</title>
+<style>
+/* ========================================
+   CSS Custom Properties
+   ======================================== */
+:root {
+  --primary-50: #EEF2FF;
+  --primary-100: #E0E7FF;
+  --primary-200: #C7D2FE;
+  --primary-300: #A5B4FC;
+  --primary-400: #818CF8;
+  --primary-500: #6366F1;
+  --primary-600: #4F46E5;
+  --primary-700: #4338CA;
+  --primary-800: #3730A3;
+  --primary-900: #312E81;
+
+  --slate-50: #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1;
+  --slate-400: #94A3B8;
+  --slate-500: #64748B;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1E293B;
+  --slate-900: #0F172A;
+  --slate-950: #020617;
+
+  --success: #10B981;
+  --success-light: #D1FAE5;
+  --success-dark: #065F46;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  --warning-dark: #92400E;
+  --error: #EF4444;
+  --error-light: #FEE2E2;
+  --error-dark: #991B1B;
+  --info: #3B82F6;
+  --info-light: #DBEAFE;
+  --info-dark: #1E40AF;
+
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.06);
+  --transition: 150ms ease;
+}
+
+/* ========================================
+   Reset & Base
+   ======================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--slate-800);
+  background: var(--slate-100);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+a { color: var(--primary-600); text-decoration: none; }
+a:hover { color: var(--primary-700); }
+
+/* ========================================
+   Layout
+   ======================================== */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--slate-900);
+  color: var(--slate-300);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--slate-700);
+}
+
+.sidebar-brand h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-brand h1 svg { flex-shrink: 0; }
+
+.sidebar-brand p {
+  font-size: 12px;
+  color: var(--slate-500);
+  margin-top: 4px;
+  padding-left: 34px;
+}
+
+.sidebar-nav {
+  padding: 16px 12px;
+  flex: 1;
+}
+
+.sidebar-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-500);
+  padding: 8px 12px 4px;
+  margin-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--slate-400);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--transition);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: var(--slate-800);
+  color: var(--slate-200);
+}
+
+.nav-item.active {
+  background: var(--primary-600);
+  color: #fff;
+}
+
+.nav-item.active svg { opacity: 1; }
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Main Area */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  height: var(--header-height);
+  min-height: var(--header-height);
+  background: #fff;
+  border-bottom: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+.content-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   Components: Cards
+   ======================================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon svg { width: 24px; height: 24px; }
+
+.kpi-icon.blue { background: var(--info-light); color: var(--info); }
+.kpi-icon.amber { background: var(--warning-light); color: var(--warning); }
+.kpi-icon.green { background: var(--success-light); color: var(--success); }
+.kpi-icon.indigo { background: var(--primary-100); color: var(--primary-600); }
+
+.kpi-info { flex: 1; }
+
+.kpi-label {
+  font-size: 13px;
+  color: var(--slate-500);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--slate-900);
+  line-height: 1.2;
+}
+
+.kpi-sub {
+  font-size: 12px;
+  color: var(--slate-400);
+  margin-top: 4px;
+}
+
+/* ========================================
+   Components: Tables
+   ======================================== */
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--slate-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--slate-500);
+  background: var(--slate-50);
+  border-bottom: 1px solid var(--slate-200);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--slate-100);
+  color: var(--slate-700);
+  vertical-align: middle;
+}
+
+tbody tr {
+  transition: background var(--transition);
+}
+
+tbody tr:hover {
+  background: var(--slate-50);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.td-primary {
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.td-mono {
+  font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-size: 13px;
+}
+
+.td-secondary {
+  color: var(--slate-500);
+  font-size: 13px;
+}
+
+/* ========================================
+   Components: Badges
+   ======================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-pending   { background: var(--warning-light); color: var(--warning-dark); }
+.badge-confirmed { background: var(--info-light); color: var(--info-dark); }
+.badge-producing { background: #F3E8FF; color: #6B21A8; }
+.badge-shipped   { background: #CFFAFE; color: #155E75; }
+.badge-completed { background: var(--success-light); color: var(--success-dark); }
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.badge-pending .badge-dot   { background: var(--warning); }
+.badge-confirmed .badge-dot { background: var(--info); }
+.badge-producing .badge-dot { background: #9333EA; }
+.badge-shipped .badge-dot   { background: #0891B2; }
+.badge-completed .badge-dot { background: var(--success); }
+
+/* ========================================
+   Components: Buttons
+   ======================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn svg { width: 16px; height: 16px; }
+
+.btn-primary {
+  background: var(--primary-600);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-700); }
+
+.btn-secondary {
+  background: #fff;
+  color: var(--slate-700);
+  border: 1px solid var(--slate-300);
+}
+.btn-secondary:hover { background: var(--slate-50); border-color: var(--slate-400); }
+
+.btn-ghost {
+  color: var(--slate-600);
+  padding: 6px 8px;
+}
+.btn-ghost:hover { background: var(--slate-100); color: var(--slate-800); }
+
+.btn-danger {
+  background: var(--error);
+  color: #fff;
+}
+.btn-danger:hover { background: #DC2626; }
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+.btn-success:hover { background: #059669; }
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+.btn-sm svg { width: 14px; height: 14px; }
+
+.btn-icon {
+  padding: 6px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+/* ========================================
+   Components: Filters
+   ======================================== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--slate-100);
+  flex-wrap: wrap;
+}
+
+.filter-input,
+.filter-select {
+  padding: 7px 12px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--slate-700);
+  background: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.filter-input { width: 200px; }
+.filter-select { min-width: 140px; }
+.filter-input[type="date"] { width: 150px; }
+
+.filter-label {
+  font-size: 12px;
+  color: var(--slate-500);
+  font-weight: 500;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ========================================
+   Components: Modal
+   ======================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  animation: fadeIn 150ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 200ms ease;
+}
+
+.modal-sm { max-width: 480px; }
+.modal-md { max-width: 640px; }
+.modal-lg { max-width: 800px; }
+.modal-xl { max-width: 960px; }
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--slate-400);
+  transition: all var(--transition);
+}
+.modal-close:hover { background: var(--slate-100); color: var(--slate-600); }
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--slate-200);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ========================================
+   Components: Forms
+   ======================================== */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 6px;
+}
+
+.form-label .required {
+  color: var(--error);
+  margin-left: 2px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--slate-800);
+  background: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.form-input.error,
+.form-select.error {
+  border-color: var(--error);
+}
+
+.form-error {
+  font-size: 12px;
+  color: var(--error);
+  margin-top: 4px;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ========================================
+   Components: Status Progress
+   ======================================== */
+.status-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 16px 0;
+}
+
+.status-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  position: relative;
+}
+
+.status-step:not(:last-child)::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: var(--slate-200);
+  margin: 0 8px;
+}
+
+.status-step.reached:not(:last-child)::after {
+  background: var(--primary-400);
+}
+
+.status-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 2px solid var(--slate-300);
+  background: #fff;
+  color: var(--slate-400);
+}
+
+.status-step.reached .status-dot {
+  border-color: var(--primary-500);
+  background: var(--primary-500);
+  color: #fff;
+}
+
+.status-step.current .status-dot {
+  border-color: var(--primary-600);
+  background: var(--primary-600);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--primary-100);
+}
+
+.status-label {
+  font-size: 12px;
+  color: var(--slate-400);
+  font-weight: 500;
+  white-space: nowrap;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+}
+
+.status-step.reached .status-label,
+.status-step.current .status-label {
+  color: var(--primary-700);
+  font-weight: 600;
+}
+
+/* ========================================
+   Components: Toast
+   ======================================== */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn 200ms ease, fadeOut 300ms ease 2.7s forwards;
+  min-width: 240px;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.toast-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.toast-error {
+  background: var(--error);
+  color: #fff;
+}
+
+.toast-info {
+  background: var(--info);
+  color: #fff;
+}
+
+/* ========================================
+   Components: Empty State
+   ======================================== */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+}
+
+.empty-state svg {
+  width: 64px;
+  height: 64px;
+  color: var(--slate-300);
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--slate-600);
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--slate-400);
+  margin-bottom: 20px;
+}
+
+/* ========================================
+   Components: Detail View
+   ======================================== */
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--slate-500);
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--slate-800);
+  font-weight: 500;
+}
+
+/* ========================================
+   Components: Order Items Table in Form
+   ======================================== */
+.order-items-table {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.order-items-table th {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-500);
+  text-align: left;
+  background: var(--slate-50);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.order-items-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--slate-100);
+  vertical-align: middle;
+}
+
+.order-items-table .form-input,
+.order-items-table .form-select {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.order-items-table .btn-icon {
+  padding: 4px;
+}
+
+.order-total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid var(--slate-200);
+  font-size: 16px;
+}
+
+.order-total-label {
+  font-weight: 600;
+  color: var(--slate-600);
+}
+
+.order-total-value {
+  font-weight: 700;
+  color: var(--slate-900);
+  font-size: 20px;
+}
+
+/* ========================================
+   Confirm Dialog
+   ======================================== */
+.confirm-body {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.confirm-body svg {
+  width: 48px;
+  height: 48px;
+  color: var(--warning);
+  margin-bottom: 12px;
+}
+
+.confirm-body p {
+  font-size: 15px;
+  color: var(--slate-700);
+  margin-bottom: 4px;
+}
+
+.confirm-body .confirm-sub {
+  font-size: 13px;
+  color: var(--slate-500);
+}
+
+/* ========================================
+   Clickable Row
+   ======================================== */
+.clickable-row {
+  cursor: pointer;
+}
+
+/* ========================================
+   Misc Utilities
+   ======================================== */
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-mono { font-family: "SF Mono", "Cascadia Code", "Consolas", monospace; }
+.nowrap { white-space: nowrap; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.mt-4 { margin-top: 16px; }
+.mb-4 { margin-bottom: 16px; }
+.gap-8 { gap: 8px; }
+</style>
+</head>
+<body>
+
+<div id="app" class="app-layout"></div>
+<div id="modal-root"></div>
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ========================================
+   Icons (Inline SVG)
+   ======================================== */
+const Icons = {
+  dashboard: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+  orders: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+  customers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  products: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
+  search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  x: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  arrowRight: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  dollarSign: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+  trendingUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+  inbox: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`,
+  forward: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>`,
+};
+
+/* ========================================
+   Utility Functions
+   ======================================== */
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+function formatCurrency(n) {
+  return '¥' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return formatDate(iso) + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function isToday(iso) {
+  if (!iso) return false;
+  const d = new Date(iso);
+  const t = new Date();
+  return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+}
+
+function isThisMonth(iso) {
+  if (!iso) return false;
+  const d = new Date(iso);
+  const t = new Date();
+  return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ========================================
+   Status Definitions
+   ======================================== */
+const STATUS_LIST = [
+  { key: 'pending',   label: '待确认', badge: 'badge-pending' },
+  { key: 'confirmed', label: '已确认', badge: 'badge-confirmed' },
+  { key: 'producing', label: '生产中', badge: 'badge-producing' },
+  { key: 'shipped',   label: '已发货', badge: 'badge-shipped' },
+  { key: 'completed', label: '已完成', badge: 'badge-completed' },
+];
+
+function getStatusInfo(key) {
+  return STATUS_LIST.find(s => s.key === key) || STATUS_LIST[0];
+}
+
+function getNextStatus(key) {
+  const idx = STATUS_LIST.findIndex(s => s.key === key);
+  if (idx < 0 || idx >= STATUS_LIST.length - 1) return null;
+  return STATUS_LIST[idx + 1];
+}
+
+function renderStatusBadge(key) {
+  const s = getStatusInfo(key);
+  return `<span class="badge ${s.badge}"><span class="badge-dot"></span>${escapeHtml(s.label)}</span>`;
+}
+
+/* ========================================
+   Data Store (localStorage)
+   ======================================== */
+const STORE_KEYS = { customers: 'om_customers', products: 'om_products', orders: 'om_orders' };
+
+const Store = {
+  get(key) {
+    try {
+      return JSON.parse(localStorage.getItem(STORE_KEYS[key])) || [];
+    } catch { return []; }
+  },
+  set(key, data) {
+    try {
+      localStorage.setItem(STORE_KEYS[key], JSON.stringify(data));
+    } catch (e) {
+      showToast('存储空间不足，请清理浏览器数据', 'error');
+    }
+  },
+  getCustomers()    { return this.get('customers'); },
+  getProducts()     { return this.get('products'); },
+  getOrders()       { return this.get('orders'); },
+  saveCustomers(d)  { this.set('customers', d); },
+  saveProducts(d)   { this.set('products', d); },
+  saveOrders(d)     { this.set('orders', d); },
+};
+
+/* ========================================
+   Seed Data
+   ======================================== */
+function generateOrderNo(dateStr, seq) {
+  const d = dateStr.replace(/-/g, '');
+  return 'ORD-' + d + '-' + String(seq).padStart(3, '0');
+}
+
+function seedData() {
+  if (Store.getCustomers().length > 0) return; // already seeded
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = (offset) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    d.setHours(9 + Math.floor(Math.random()*8), Math.floor(Math.random()*60));
+    return d.toISOString();
+  };
+  const todayStr = today.toISOString().split('T')[0];
+
+  const customers = [
+    { id: 'c1', name: '上海锐创科技有限公司', contact: '王建国', phone: '13800138001', company: '锐创科技', address: '上海市浦东新区张江高科技园区', createdAt: day(-30) },
+    { id: 'c2', name: '深圳星辰电子有限公司', contact: '李美玲', phone: '13900139002', company: '星辰电子', address: '深圳市南山区科技园南区', createdAt: day(-28) },
+    { id: 'c3', name: '北京智云网络科技有限公司', contact: '张明辉', phone: '13700137003', company: '智云网络', address: '北京市海淀区中关村软件园', createdAt: day(-25) },
+    { id: 'c4', name: '杭州数联信息技术有限公司', contact: '陈思远', phone: '13600136004', company: '数联信息', address: '杭州市余杭区未来科技城', createdAt: day(-20) },
+    { id: 'c5', name: '广州汇通贸易有限公司', contact: '刘芳华', phone: '13500135005', company: '汇通贸易', address: '广州市天河区珠江新城', createdAt: day(-15) },
+  ];
+
+  const products = [
+    { id: 'p1', name: '工业传感器 A200', sku: 'SEN-A200', price: 580,  unit: '个', category: '传感器', createdAt: day(-30) },
+    { id: 'p2', name: '控制模块 X100',   sku: 'CTL-X100', price: 1280, unit: '个', category: '控制器', createdAt: day(-30) },
+    { id: 'p3', name: '智能网关 G500',    sku: 'GW-G500',  price: 2350, unit: '台', category: '网关',   createdAt: day(-28) },
+    { id: 'p4', name: '数据采集卡 D300',  sku: 'DAQ-D300', price: 960,  unit: '块', category: '采集卡', createdAt: day(-25) },
+    { id: 'p5', name: '电源模块 P150',    sku: 'PWR-P150', price: 420,  unit: '个', category: '电源',   createdAt: day(-20) },
+    { id: 'p6', name: '通信模组 C80',     sku: 'COM-C80',  price: 350,  unit: '个', category: '通信',   createdAt: day(-15) },
+  ];
+
+  const orders = [
+    {
+      id: 'o1', orderNo: generateOrderNo(todayStr, 1), customerId: 'c1',
+      items: [
+        { productId: 'p1', productName: '工业传感器 A200', quantity: 20, price: 580, subtotal: 11600 },
+        { productId: 'p2', productName: '控制模块 X100', quantity: 5, price: 1280, subtotal: 6400 },
+      ],
+      totalAmount: 18000, status: 'pending', notes: '急需，请优先安排生产', createdAt: day(0), updatedAt: day(0)
+    },
+    {
+      id: 'o2', orderNo: generateOrderNo(todayStr, 2), customerId: 'c2',
+      items: [
+        { productId: 'p3', productName: '智能网关 G500', quantity: 10, price: 2350, subtotal: 23500 },
+      ],
+      totalAmount: 23500, status: 'pending', notes: '', createdAt: day(0), updatedAt: day(0)
+    },
+    {
+      id: 'o3', orderNo: generateOrderNo(formatDate(day(-1)), 1), customerId: 'c3',
+      items: [
+        { productId: 'p4', productName: '数据采集卡 D300', quantity: 15, price: 960, subtotal: 14400 },
+        { productId: 'p6', productName: '通信模组 C80', quantity: 30, price: 350, subtotal: 10500 },
+      ],
+      totalAmount: 24900, status: 'confirmed', notes: '合同已签署', createdAt: day(-1), updatedAt: day(-1)
+    },
+    {
+      id: 'o4', orderNo: generateOrderNo(formatDate(day(-3)), 1), customerId: 'c1',
+      items: [
+        { productId: 'p5', productName: '电源模块 P150', quantity: 50, price: 420, subtotal: 21000 },
+      ],
+      totalAmount: 21000, status: 'producing', notes: '预计下周完成', createdAt: day(-3), updatedAt: day(-2)
+    },
+    {
+      id: 'o5', orderNo: generateOrderNo(formatDate(day(-5)), 1), customerId: 'c4',
+      items: [
+        { productId: 'p1', productName: '工业传感器 A200', quantity: 100, price: 580, subtotal: 58000 },
+        { productId: 'p3', productName: '智能网关 G500', quantity: 5, price: 2350, subtotal: 11750 },
+      ],
+      totalAmount: 69750, status: 'producing', notes: '大批量订单，分批发货', createdAt: day(-5), updatedAt: day(-3)
+    },
+    {
+      id: 'o6', orderNo: generateOrderNo(formatDate(day(-8)), 1), customerId: 'c5',
+      items: [
+        { productId: 'p2', productName: '控制模块 X100', quantity: 8, price: 1280, subtotal: 10240 },
+        { productId: 'p6', productName: '通信模组 C80', quantity: 20, price: 350, subtotal: 7000 },
+      ],
+      totalAmount: 17240, status: 'shipped', notes: '顺丰快递 SF1234567890', createdAt: day(-8), updatedAt: day(-5)
+    },
+    {
+      id: 'o7', orderNo: generateOrderNo(formatDate(day(-12)), 1), customerId: 'c2',
+      items: [
+        { productId: 'p4', productName: '数据采集卡 D300', quantity: 10, price: 960, subtotal: 9600 },
+      ],
+      totalAmount: 9600, status: 'completed', notes: '客户已确认收货', createdAt: day(-12), updatedAt: day(-8)
+    },
+    {
+      id: 'o8', orderNo: generateOrderNo(formatDate(day(-15)), 1), customerId: 'c3',
+      items: [
+        { productId: 'p5', productName: '电源模块 P150', quantity: 30, price: 420, subtotal: 12600 },
+        { productId: 'p1', productName: '工业传感器 A200', quantity: 10, price: 580, subtotal: 5800 },
+      ],
+      totalAmount: 18400, status: 'completed', notes: '', createdAt: day(-15), updatedAt: day(-10)
+    },
+  ];
+
+  Store.saveCustomers(customers);
+  Store.saveProducts(products);
+  Store.saveOrders(orders);
+}
+
+/* ========================================
+   App State
+   ======================================== */
+const state = {
+  view: 'dashboard',
+  orderFilters: { status: '', customerId: '', search: '', dateFrom: '', dateTo: '' },
+  modal: null, // { type, data }
+};
+
+/* ========================================
+   Toast System
+   ======================================== */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const icon = type === 'success' ? Icons.check : type === 'error' ? Icons.x : Icons.check;
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `${icon}<span>${escapeHtml(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+/* ========================================
+   Navigation
+   ======================================== */
+function navigate(view) {
+  state.view = view;
+  render();
+}
+
+/* ========================================
+   Modal Management
+   ======================================== */
+function openModal(type, data = null) {
+  state.modal = { type, data };
+  renderModal();
+}
+
+function closeModal() {
+  state.modal = null;
+  document.getElementById('modal-root').innerHTML = '';
+}
+
+/* ========================================
+   Render: App Shell
+   ======================================== */
+function render() {
+  const app = document.getElementById('app');
+  const views = { dashboard: 'renderDashboard', orders: 'renderOrders', customers: 'renderCustomers', products: 'renderProducts' };
+  const viewTitles = { dashboard: '仪表盘', orders: '订单管理', customers: '客户管理', products: '商品管理' };
+
+  app.innerHTML = `
+    ${renderSidebar()}
+    <div class="main-area">
+      ${renderHeader(viewTitles[state.view])}
+      <div class="content">
+        <div class="content-inner" id="view-content"></div>
+      </div>
+    </div>
+  `;
+
+  const contentEl = document.getElementById('view-content');
+  const fn = views[state.view];
+  if (fn && typeof window[fn] === 'function') {
+    contentEl.innerHTML = window[fn]();
+  }
+
+  bindNavEvents();
+  bindViewEvents();
+}
+
+function renderSidebar() {
+  const items = [
+    { view: 'dashboard', icon: Icons.dashboard, label: '仪表盘' },
+    { view: 'orders',    icon: Icons.orders,    label: '订单管理' },
+    { view: 'customers', icon: Icons.customers, label: '客户管理' },
+    { view: 'products',  icon: Icons.products,  label: '商品管理' },
+  ];
+
+  return `
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <h1>${Icons.inbox} 订单管理</h1>
+        <p>内部管理工具</p>
+      </div>
+      <div class="sidebar-nav">
+        <div class="sidebar-section-label">主菜单</div>
+        ${items.map(it => `
+          <button class="nav-item ${state.view === it.view ? 'active' : ''}" data-nav="${it.view}">
+            ${it.icon}
+            <span>${it.label}</span>
+          </button>
+        `).join('')}
+      </div>
+    </nav>
+  `;
+}
+
+function renderHeader(title) {
+  const actions = [];
+  if (state.view === 'orders') {
+    actions.push(`<button class="btn btn-secondary btn-sm" onclick="handleExport()">${Icons.download} 导出</button>`);
+    actions.push(`<button class="btn btn-primary btn-sm" onclick="openModal('orderForm')">${Icons.plus} 新建订单</button>`);
+  }
+  if (state.view === 'customers') {
+    actions.push(`<button class="btn btn-primary btn-sm" onclick="openModal('customerForm')">${Icons.plus} 新增客户</button>`);
+  }
+  if (state.view === 'products') {
+    actions.push(`<button class="btn btn-primary btn-sm" onclick="openModal('productForm')">${Icons.plus} 新增商品</button>`);
+  }
+
+  return `
+    <header class="header">
+      <h2 class="header-title">${title}</h2>
+      <div class="header-actions">${actions.join('')}</div>
+    </header>
+  `;
+}
+
+function bindNavEvents() {
+  document.querySelectorAll('[data-nav]').forEach(btn => {
+    btn.addEventListener('click', () => navigate(btn.dataset.nav));
+  });
+}
+
+/* ========================================
+   Render: Dashboard
+   ======================================== */
+window.renderDashboard = function() {
+  const orders = Store.getOrders();
+  const customers = Store.getCustomers();
+  const todayOrders = orders.filter(o => isToday(o.createdAt));
+  const pendingOrders = orders.filter(o => o.status === 'pending');
+  const monthOrders = orders.filter(o => isThisMonth(o.createdAt));
+  const monthSales = monthOrders.reduce((s, o) => s + o.totalAmount, 0);
+  const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+  return `
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon blue">${Icons.calendar}</div>
+        <div class="kpi-info">
+          <div class="kpi-label">今日订单</div>
+          <div class="kpi-value">${todayOrders.length}</div>
+          <div class="kpi-sub">新增订单数</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon amber">${Icons.clock}</div>
+        <div class="kpi-info">
+          <div class="kpi-label">待处理订单</div>
+          <div class="kpi-value">${pendingOrders.length}</div>
+          <div class="kpi-sub">需要确认</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon green">${Icons.dollarSign}</div>
+        <div class="kpi-info">
+          <div class="kpi-label">本月销售额</div>
+          <div class="kpi-value">${formatCurrency(monthSales)}</div>
+          <div class="kpi-sub">${monthOrders.length} 笔订单</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon indigo">${Icons.customers}</div>
+        <div class="kpi-info">
+          <div class="kpi-label">客户总数</div>
+          <div class="kpi-value">${customers.length}</div>
+          <div class="kpi-sub">已录入客户</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">最近订单</span>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('orders')">查看全部 ${Icons.arrowRight}</button>
+      </div>
+      ${recentOrders.length > 0 ? `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>订单号</th>
+                <th>客户</th>
+                <th>金额</th>
+                <th>状态</th>
+                <th>创建时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentOrders.map(o => {
+                const cust = customers.find(c => c.id === o.customerId);
+                return `
+                  <tr class="clickable-row" onclick="openModal('orderDetail', '${o.id}')">
+                    <td class="td-primary td-mono">${escapeHtml(o.orderNo)}</td>
+                    <td>${cust ? escapeHtml(cust.name) : '—'}</td>
+                    <td class="td-mono nowrap">${formatCurrency(o.totalAmount)}</td>
+                    <td>${renderStatusBadge(o.status)}</td>
+                    <td class="td-secondary nowrap">${formatDateTime(o.createdAt)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="empty-state">
+          ${Icons.orders}
+          <h3>暂无订单</h3>
+          <p>点击右上角"新建订单"开始创建第一笔订单</p>
+        </div>
+      `}
+    </div>
+  `;
+};
+
+/* ========================================
+   Render: Orders
+   ======================================== */
+window.renderOrders = function() {
+  const orders = Store.getOrders();
+  const customers = Store.getCustomers();
+  const f = state.orderFilters;
+
+  let filtered = orders.filter(o => {
+    if (f.status && o.status !== f.status) return false;
+    if (f.customerId && o.customerId !== f.customerId) return false;
+    if (f.dateFrom && o.createdAt < f.dateFrom) return false;
+    if (f.dateTo && new Date(o.createdAt) > new Date(f.dateTo + 'T23:59:59.999')) return false;
+    if (f.search) {
+      const s = f.search.toLowerCase();
+      const cust = customers.find(c => c.id === o.customerId);
+      const custName = cust ? cust.name.toLowerCase() : '';
+      if (!o.orderNo.toLowerCase().includes(s) && !custName.includes(s)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  return `
+    <div class="card">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span class="filter-label">搜索</span>
+          <input type="text" class="filter-input" id="filter-search" placeholder="订单号 / 客户名称" value="${escapeHtml(f.search)}">
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">状态</span>
+          <select class="filter-select" id="filter-status">
+            <option value="">全部状态</option>
+            ${STATUS_LIST.map(s => `<option value="${s.key}" ${f.status === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">客户</span>
+          <select class="filter-select" id="filter-customer">
+            <option value="">全部客户</option>
+            ${customers.map(c => `<option value="${c.id}" ${f.customerId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">从</span>
+          <input type="date" class="filter-input" id="filter-date-from" value="${f.dateFrom}">
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">至</span>
+          <input type="date" class="filter-input" id="filter-date-to" value="${f.dateTo}">
+        </div>
+      </div>
+      ${filtered.length > 0 ? `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>订单号</th>
+                <th>客户</th>
+                <th>商品数</th>
+                <th>金额</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th class="text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(o => {
+                const cust = customers.find(c => c.id === o.customerId);
+                return `
+                  <tr class="clickable-row" onclick="openModal('orderDetail', '${o.id}')">
+                    <td class="td-primary td-mono">${escapeHtml(o.orderNo)}</td>
+                    <td>${cust ? escapeHtml(cust.name) : '—'}</td>
+                    <td class="text-center">${o.items.length}</td>
+                    <td class="td-mono nowrap">${formatCurrency(o.totalAmount)}</td>
+                    <td>${renderStatusBadge(o.status)}</td>
+                    <td class="td-secondary nowrap">${formatDateTime(o.createdAt)}</td>
+                    <td class="text-center">
+                      <div class="btn-group" style="justify-content:center;">
+                        <button class="btn btn-ghost btn-icon" title="查看" onclick="event.stopPropagation(); openModal('orderDetail', '${o.id}')">${Icons.eye}</button>
+                        <button class="btn btn-ghost btn-icon" title="编辑" onclick="event.stopPropagation(); openModal('orderForm', '${o.id}')" ${['shipped','completed'].includes(o.status) ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>${Icons.edit}</button>
+                        <button class="btn btn-ghost btn-icon" title="删除" onclick="event.stopPropagation(); openModal('confirmDelete', {type:'order',id:'${o.id}',label:'${escapeHtml(o.orderNo)}'})" style="color:var(--error);">${Icons.trash}</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="empty-state">
+          ${Icons.orders}
+          <h3>未找到订单</h3>
+          <p>${orders.length > 0 ? '尝试调整筛选条件' : '点击右上角"新建订单"创建第一笔订单'}</p>
+          ${orders.length === 0 ? `<button class="btn btn-primary btn-sm" onclick="openModal('orderForm')">${Icons.plus} 新建订单</button>` : ''}
+        </div>
+      `}
+    </div>
+  `;
+};
+
+/* ========================================
+   Render: Customers
+   ======================================== */
+window.renderCustomers = function() {
+  const customers = Store.getCustomers();
+  const orders = Store.getOrders();
+
+  return `
+    <div class="card">
+      ${customers.length > 0 ? `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>客户名称</th>
+                <th>联系人</th>
+                <th>电话</th>
+                <th>地址</th>
+                <th>订单数</th>
+                <th class="text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${customers.map(c => {
+                const orderCount = orders.filter(o => o.customerId === c.id).length;
+                return `
+                  <tr>
+                    <td class="td-primary">${escapeHtml(c.name)}</td>
+                    <td>${escapeHtml(c.contact)}</td>
+                    <td class="td-mono">${escapeHtml(c.phone)}</td>
+                    <td class="td-secondary">${escapeHtml(c.address || '—')}</td>
+                    <td class="text-center">${orderCount}</td>
+                    <td class="text-center">
+                      <div class="btn-group" style="justify-content:center;">
+                        <button class="btn btn-ghost btn-icon" title="编辑" onclick="openModal('customerForm', '${c.id}')">${Icons.edit}</button>
+                        <button class="btn btn-ghost btn-icon" title="删除" onclick="openModal('confirmDelete', {type:'customer',id:'${c.id}',label:'${escapeHtml(c.name)}'})" style="color:var(--error);">${Icons.trash}</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="empty-state">
+          ${Icons.customers}
+          <h3>暂无客户</h3>
+          <p>点击右上角"新增客户"添加您的第一位客户</p>
+          <button class="btn btn-primary btn-sm" onclick="openModal('customerForm')">${Icons.plus} 新增客户</button>
+        </div>
+      `}
+    </div>
+  `;
+};
+
+/* ========================================
+   Render: Products
+   ======================================== */
+window.renderProducts = function() {
+  const products = Store.getProducts();
+
+  return `
+    <div class="card">
+      ${products.length > 0 ? `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>商品名称</th>
+                <th>SKU</th>
+                <th>单价</th>
+                <th>单位</th>
+                <th>分类</th>
+                <th class="text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${products.map(p => `
+                <tr>
+                  <td class="td-primary">${escapeHtml(p.name)}</td>
+                  <td class="td-mono">${escapeHtml(p.sku)}</td>
+                  <td class="td-mono nowrap">${formatCurrency(p.price)}</td>
+                  <td>${escapeHtml(p.unit)}</td>
+                  <td><span class="badge badge-confirmed">${escapeHtml(p.category)}</span></td>
+                  <td class="text-center">
+                    <div class="btn-group" style="justify-content:center;">
+                      <button class="btn btn-ghost btn-icon" title="编辑" onclick="openModal('productForm', '${p.id}')">${Icons.edit}</button>
+                      <button class="btn btn-ghost btn-icon" title="删除" onclick="openModal('confirmDelete', {type:'product',id:'${p.id}',label:'${escapeHtml(p.name)}'})" style="color:var(--error);">${Icons.trash}</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="empty-state">
+          ${Icons.products}
+          <h3>暂无商品</h3>
+          <p>点击右上角"新增商品"添加商品到目录</p>
+          <button class="btn btn-primary btn-sm" onclick="openModal('productForm')">${Icons.plus} 新增商品</button>
+        </div>
+      `}
+    </div>
+  `;
+};
+
+/* ========================================
+   View Event Binding
+   ======================================== */
+function bindViewEvents() {
+  // Order filters
+  const searchInput = document.getElementById('filter-search');
+  const statusSelect = document.getElementById('filter-status');
+  const customerSelect = document.getElementById('filter-customer');
+  const dateFrom = document.getElementById('filter-date-from');
+  const dateTo = document.getElementById('filter-date-to');
+
+  if (searchInput) {
+    let debounce;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        state.orderFilters.search = searchInput.value;
+        const contentEl = document.getElementById('view-content');
+        contentEl.innerHTML = renderOrders();
+        bindViewEvents();
+      }, 300);
+    });
+  }
+  [statusSelect, customerSelect, dateFrom, dateTo].forEach(el => {
+    if (el) {
+      el.addEventListener('change', () => {
+        if (statusSelect) state.orderFilters.status = statusSelect.value;
+        if (customerSelect) state.orderFilters.customerId = customerSelect.value;
+        if (dateFrom) state.orderFilters.dateFrom = dateFrom.value;
+        if (dateTo) state.orderFilters.dateTo = dateTo.value;
+        const contentEl = document.getElementById('view-content');
+        contentEl.innerHTML = renderOrders();
+        bindViewEvents();
+      });
+    }
+  });
+}
+
+/* ========================================
+   Render: Modals
+   ======================================== */
+function renderModal() {
+  const root = document.getElementById('modal-root');
+  if (!state.modal) { root.innerHTML = ''; return; }
+
+  const { type, data } = state.modal;
+
+  switch (type) {
+    case 'orderForm':    root.innerHTML = renderOrderFormModal(data); bindOrderForm(); break;
+    case 'orderDetail':  root.innerHTML = renderOrderDetailModal(data); break;
+    case 'customerForm': root.innerHTML = renderCustomerFormModal(data); bindCustomerForm(); break;
+    case 'productForm':  root.innerHTML = renderProductFormModal(data); bindProductForm(); break;
+    case 'confirmDelete': root.innerHTML = renderConfirmModal(data); break;
+    default: root.innerHTML = '';
+  }
+}
+
+/* ========================================
+   Modal: Order Form
+   ======================================== */
+// Temporary state for order form items
+let orderFormItems = [];
+
+function renderOrderFormModal(editId) {
+  const customers = Store.getCustomers();
+  const products = Store.getProducts();
+  const isEdit = !!editId;
+  let order = null;
+
+  if (isEdit) {
+    order = Store.getOrders().find(o => o.id === editId);
+    if (!order) return '';
+    orderFormItems = order.items.map(it => ({ ...it, _id: uid() }));
+  } else {
+    orderFormItems = [{ _id: uid(), productId: '', productName: '', quantity: 1, price: 0, subtotal: 0 }];
+  }
+
+  const totalAmount = orderFormItems.reduce((s, it) => s + (it.subtotal || 0), 0);
+
+  return `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3 class="modal-title">${isEdit ? '编辑订单' : '新建订单'}</h3>
+          <button class="modal-close" onclick="closeModal()">${Icons.x}</button>
+        </div>
+        <div class="modal-body">
+          <form id="order-form" onsubmit="handleOrderSubmit(event, '${editId || ''}')">
+            <div class="form-group">
+              <label class="form-label">客户 <span class="required">*</span></label>
+              <select class="form-select" id="of-customer" required>
+                <option value="">请选择客户</option>
+                ${customers.map(c => `<option value="${c.id}" ${order && order.customerId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">订单商品 <span class="required">*</span></label>
+              <div id="order-items-container">
+                ${renderOrderItemsTable(products)}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">备注</label>
+              <textarea class="form-textarea" id="of-notes" placeholder="订单备注...">${order ? escapeHtml(order.notes) : ''}</textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="document.getElementById('order-form').requestSubmit()">
+            ${isEdit ? '保存修改' : '创建订单'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderOrderItemsTable(products) {
+  if (!products) products = Store.getProducts();
+  const totalAmount = orderFormItems.reduce((s, it) => s + (it.subtotal || 0), 0);
+
+  return `
+    <table class="order-items-table">
+      <thead>
+        <tr>
+          <th style="width:35%">商品</th>
+          <th style="width:15%">单价</th>
+          <th style="width:15%">数量</th>
+          <th style="width:20%">小计</th>
+          <th style="width:15%"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${orderFormItems.map((it, idx) => `
+          <tr data-item-id="${it._id}">
+            <td>
+              <select class="form-select oi-product" data-idx="${idx}" required>
+                <option value="">选择商品</option>
+                ${products.map(p => `<option value="${p.id}" data-price="${p.price}" data-name="${escapeHtml(p.name)}" ${it.productId === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+              </select>
+            </td>
+            <td class="td-mono">${it.price > 0 ? formatCurrency(it.price) : '—'}</td>
+            <td>
+              <input type="number" class="form-input oi-qty" data-idx="${idx}" min="1" value="${it.quantity}" style="width:70px" required>
+            </td>
+            <td class="td-mono">${it.subtotal > 0 ? formatCurrency(it.subtotal) : '—'}</td>
+            <td class="text-center">
+              ${orderFormItems.length > 1 ? `<button type="button" class="btn btn-ghost btn-icon oi-remove" data-idx="${idx}" title="移除" style="color:var(--error);">${Icons.trash}</button>` : ''}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+      <button type="button" class="btn btn-secondary btn-sm" id="add-order-item">${Icons.plus} 添加商品</button>
+      <div class="order-total-row" style="margin-top:0; padding-top:0; border-top:none;">
+        <span class="order-total-label">合计：</span>
+        <span class="order-total-value">${formatCurrency(totalAmount)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function refreshOrderItems() {
+  const container = document.getElementById('order-items-container');
+  if (container) {
+    container.innerHTML = renderOrderItemsTable();
+    bindOrderItemEvents();
+  }
+}
+
+function bindOrderForm() {
+  bindOrderItemEvents();
+}
+
+function bindOrderItemEvents() {
+  // Product select change
+  document.querySelectorAll('.oi-product').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      const opt = e.target.selectedOptions[0];
+      if (opt && opt.value) {
+        orderFormItems[idx].productId = opt.value;
+        orderFormItems[idx].productName = opt.dataset.name || '';
+        orderFormItems[idx].price = parseFloat(opt.dataset.price) || 0;
+        orderFormItems[idx].subtotal = orderFormItems[idx].price * orderFormItems[idx].quantity;
+      } else {
+        orderFormItems[idx].productId = '';
+        orderFormItems[idx].productName = '';
+        orderFormItems[idx].price = 0;
+        orderFormItems[idx].subtotal = 0;
+      }
+      refreshOrderItems();
+    });
+  });
+
+  // Quantity change
+  document.querySelectorAll('.oi-qty').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      const qty = Math.max(1, parseInt(e.target.value) || 1);
+      orderFormItems[idx].quantity = qty;
+      orderFormItems[idx].subtotal = orderFormItems[idx].price * qty;
+      refreshOrderItems();
+    });
+  });
+
+  // Remove item
+  document.querySelectorAll('.oi-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.currentTarget.dataset.idx);
+      orderFormItems.splice(idx, 1);
+      refreshOrderItems();
+    });
+  });
+
+  // Add item
+  const addBtn = document.getElementById('add-order-item');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      orderFormItems.push({ _id: uid(), productId: '', productName: '', quantity: 1, price: 0, subtotal: 0 });
+      refreshOrderItems();
+    });
+  }
+}
+
+window.handleOrderSubmit = function(e, editId) {
+  e.preventDefault();
+
+  const customerId = document.getElementById('of-customer').value;
+  const notes = document.getElementById('of-notes').value.trim();
+
+  if (!customerId) {
+    showToast('请选择客户', 'error');
+    return;
+  }
+
+  // Validate items
+  const emptyItems = orderFormItems.filter(it => !it.productId || it.quantity <= 0);
+  const validItems = orderFormItems.filter(it => it.productId && it.quantity > 0);
+  if (emptyItems.length > 0 && validItems.length > 0) {
+    showToast('请填写所有商品行或删除空行', 'error');
+    return;
+  }
+  if (validItems.length === 0) {
+    showToast('请至少添加一件商品', 'error');
+    return;
+  }
+
+  const totalAmount = validItems.reduce((s, it) => s + it.subtotal, 0);
+  const items = validItems.map(it => ({
+    productId: it.productId,
+    productName: it.productName,
+    quantity: it.quantity,
+    price: it.price,
+    subtotal: it.subtotal
+  }));
+
+  const orders = Store.getOrders();
+
+  if (editId) {
+    const idx = orders.findIndex(o => o.id === editId);
+    if (idx >= 0) {
+      orders[idx].customerId = customerId;
+      orders[idx].items = items;
+      orders[idx].totalAmount = totalAmount;
+      orders[idx].notes = notes;
+      orders[idx].updatedAt = new Date().toISOString();
+      Store.saveOrders(orders);
+      showToast('订单已更新');
+    }
+  } else {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayDateCompact = todayStr.replace(/-/g, '');
+    const todayOrders = orders.filter(o => o.orderNo && o.orderNo.includes(todayDateCompact));
+    const maxSeq = todayOrders.reduce((max, o) => {
+      const match = o.orderNo.match(/-(\d{3})$/);
+      return match ? Math.max(max, parseInt(match[1], 10)) : max;
+    }, 0);
+    const seq = maxSeq + 1;
+    const newOrder = {
+      id: uid(),
+      orderNo: generateOrderNo(todayStr, seq),
+      customerId,
+      items,
+      totalAmount,
+      status: 'pending',
+      notes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    orders.push(newOrder);
+    Store.saveOrders(orders);
+    showToast('订单已创建');
+  }
+
+  closeModal();
+  render();
+};
+
+/* ========================================
+   Modal: Order Detail
+   ======================================== */
+function renderOrderDetailModal(orderId) {
+  const orders = Store.getOrders();
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return '';
+
+  const customers = Store.getCustomers();
+  const customer = customers.find(c => c.id === order.customerId);
+  const nextStatus = getNextStatus(order.status);
+  const currentIdx = STATUS_LIST.findIndex(s => s.key === order.status);
+
+  return `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3 class="modal-title">订单详情 — ${escapeHtml(order.orderNo)}</h3>
+          <button class="modal-close" onclick="closeModal()">${Icons.x}</button>
+        </div>
+        <div class="modal-body">
+          <!-- Status Flow -->
+          <div style="padding:8px 0 32px;">
+            <div class="status-flow">
+              ${STATUS_LIST.map((s, i) => {
+                let cls = '';
+                if (i < currentIdx) cls = 'reached';
+                else if (i === currentIdx) cls = 'reached current';
+                return `
+                  <div class="status-step ${cls}">
+                    <div class="status-dot">${i < currentIdx ? Icons.check : i + 1}</div>
+                    <span class="status-label">${s.label}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Order Info -->
+          <div class="detail-section">
+            <div class="detail-section-title">基本信息</div>
+            <div class="detail-grid">
+              <div>
+                <div class="detail-label">订单号</div>
+                <div class="detail-value font-mono">${escapeHtml(order.orderNo)}</div>
+              </div>
+              <div>
+                <div class="detail-label">客户</div>
+                <div class="detail-value">${customer ? escapeHtml(customer.name) : '—'}</div>
+              </div>
+              <div>
+                <div class="detail-label">创建时间</div>
+                <div class="detail-value">${formatDateTime(order.createdAt)}</div>
+              </div>
+              <div>
+                <div class="detail-label">更新时间</div>
+                <div class="detail-value">${formatDateTime(order.updatedAt)}</div>
+              </div>
+              ${order.notes ? `
+                <div style="grid-column: 1 / -1;">
+                  <div class="detail-label">备注</div>
+                  <div class="detail-value">${escapeHtml(order.notes)}</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div class="detail-section">
+            <div class="detail-section-title">商品明细</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>商品</th>
+                  <th class="text-right">单价</th>
+                  <th class="text-right">数量</th>
+                  <th class="text-right">小计</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.items.map(it => `
+                  <tr>
+                    <td class="td-primary">${escapeHtml(it.productName)}</td>
+                    <td class="td-mono text-right">${formatCurrency(it.price)}</td>
+                    <td class="text-right">${it.quantity}</td>
+                    <td class="td-mono text-right">${formatCurrency(it.subtotal)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="order-total-row">
+              <span class="order-total-label">订单总额：</span>
+              <span class="order-total-value">${formatCurrency(order.totalAmount)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          ${nextStatus ? `
+            <button class="btn btn-success" onclick="advanceOrderStatus('${order.id}')">
+              ${Icons.forward} 推进至「${nextStatus.label}」
+            </button>
+          ` : ''}
+          <button class="btn btn-secondary" onclick="openModal('orderForm', '${order.id}')" ${['shipped','completed'].includes(order.status) ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+            ${Icons.edit} 编辑
+          </button>
+          <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.advanceOrderStatus = function(orderId) {
+  const orders = Store.getOrders();
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+
+  const next = getNextStatus(order.status);
+  if (!next) return;
+
+  if (!confirm(`确定要将订单状态推进至「${next.label}」吗？此操作不可撤销`)) return;
+
+  order.status = next.key;
+  order.updatedAt = new Date().toISOString();
+  Store.saveOrders(orders);
+
+  showToast(`订单状态已更新为「${next.label}」`);
+  openModal('orderDetail', orderId);
+  // Re-render background if visible
+  const contentEl = document.getElementById('view-content');
+  if (state.view === 'orders' && contentEl) {
+    contentEl.innerHTML = renderOrders();
+    bindViewEvents();
+  } else if (state.view === 'dashboard' && contentEl) {
+    contentEl.innerHTML = renderDashboard();
+  }
+};
+
+/* ========================================
+   Modal: Customer Form
+   ======================================== */
+function renderCustomerFormModal(editId) {
+  const isEdit = !!editId;
+  let cust = null;
+  if (isEdit) {
+    cust = Store.getCustomers().find(c => c.id === editId);
+    if (!cust) return '';
+  }
+
+  return `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal modal-md">
+        <div class="modal-header">
+          <h3 class="modal-title">${isEdit ? '编辑客户' : '新增客户'}</h3>
+          <button class="modal-close" onclick="closeModal()">${Icons.x}</button>
+        </div>
+        <div class="modal-body">
+          <form id="customer-form" onsubmit="handleCustomerSubmit(event, '${editId || ''}')">
+            <div class="form-group">
+              <label class="form-label">客户名称 <span class="required">*</span></label>
+              <input type="text" class="form-input" id="cf-name" value="${cust ? escapeHtml(cust.name) : ''}" placeholder="例：XX科技有限公司" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">联系人 <span class="required">*</span></label>
+                <input type="text" class="form-input" id="cf-contact" value="${cust ? escapeHtml(cust.contact) : ''}" placeholder="联系人姓名" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">电话 <span class="required">*</span></label>
+                <input type="text" class="form-input" id="cf-phone" value="${cust ? escapeHtml(cust.phone) : ''}" placeholder="手机号" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">地址</label>
+              <input type="text" class="form-input" id="cf-address" value="${cust ? escapeHtml(cust.address || '') : ''}" placeholder="详细地址">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="document.getElementById('customer-form').requestSubmit()">
+            ${isEdit ? '保存修改' : '添加客户'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindCustomerForm() {
+  // No special bindings needed
+}
+
+window.handleCustomerSubmit = function(e, editId) {
+  e.preventDefault();
+
+  const name = document.getElementById('cf-name').value.trim();
+  const contact = document.getElementById('cf-contact').value.trim();
+  const phone = document.getElementById('cf-phone').value.trim();
+  const address = document.getElementById('cf-address').value.trim();
+
+  if (!name || !contact || !phone) {
+    showToast('请填写必填项', 'error');
+    return;
+  }
+
+  const customers = Store.getCustomers();
+
+  if (editId) {
+    const idx = customers.findIndex(c => c.id === editId);
+    if (idx >= 0) {
+      customers[idx].name = name;
+      customers[idx].contact = contact;
+      customers[idx].phone = phone;
+      customers[idx].address = address;
+      Store.saveCustomers(customers);
+      showToast('客户信息已更新');
+    }
+  } else {
+    customers.push({
+      id: uid(),
+      name, contact, phone, company: name, address,
+      createdAt: new Date().toISOString()
+    });
+    Store.saveCustomers(customers);
+    showToast('客户已添加');
+  }
+
+  closeModal();
+  render();
+};
+
+/* ========================================
+   Modal: Product Form
+   ======================================== */
+function renderProductFormModal(editId) {
+  const isEdit = !!editId;
+  let prod = null;
+  if (isEdit) {
+    prod = Store.getProducts().find(p => p.id === editId);
+    if (!prod) return '';
+  }
+
+  return `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal modal-md">
+        <div class="modal-header">
+          <h3 class="modal-title">${isEdit ? '编辑商品' : '新增商品'}</h3>
+          <button class="modal-close" onclick="closeModal()">${Icons.x}</button>
+        </div>
+        <div class="modal-body">
+          <form id="product-form" onsubmit="handleProductSubmit(event, '${editId || ''}')">
+            <div class="form-group">
+              <label class="form-label">商品名称 <span class="required">*</span></label>
+              <input type="text" class="form-input" id="pf-name" value="${prod ? escapeHtml(prod.name) : ''}" placeholder="例：工业传感器 A200" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">SKU <span class="required">*</span></label>
+                <input type="text" class="form-input" id="pf-sku" value="${prod ? escapeHtml(prod.sku) : ''}" placeholder="例：SEN-A200" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">分类</label>
+                <input type="text" class="form-input" id="pf-category" value="${prod ? escapeHtml(prod.category) : ''}" placeholder="例：传感器">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">单价 <span class="required">*</span></label>
+                <input type="number" class="form-input" id="pf-price" value="${prod ? prod.price : ''}" placeholder="0.00" min="0" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">单位 <span class="required">*</span></label>
+                <input type="text" class="form-input" id="pf-unit" value="${prod ? escapeHtml(prod.unit) : ''}" placeholder="例：个、台、块" required>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="document.getElementById('product-form').requestSubmit()">
+            ${isEdit ? '保存修改' : '添加商品'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindProductForm() {
+  // No special bindings needed
+}
+
+window.handleProductSubmit = function(e, editId) {
+  e.preventDefault();
+
+  const name = document.getElementById('pf-name').value.trim();
+  const sku = document.getElementById('pf-sku').value.trim();
+  const category = document.getElementById('pf-category').value.trim();
+  const price = parseFloat(document.getElementById('pf-price').value);
+  const unit = document.getElementById('pf-unit').value.trim();
+
+  if (!name || !sku || isNaN(price) || !unit) {
+    showToast('请填写必填项', 'error');
+    return;
+  }
+
+  const products = Store.getProducts();
+
+  if (editId) {
+    const idx = products.findIndex(p => p.id === editId);
+    if (idx >= 0) {
+      products[idx].name = name;
+      products[idx].sku = sku;
+      products[idx].category = category;
+      products[idx].price = price;
+      products[idx].unit = unit;
+      Store.saveProducts(products);
+      showToast('商品信息已更新');
+    }
+  } else {
+    products.push({
+      id: uid(),
+      name, sku, category, price, unit,
+      createdAt: new Date().toISOString()
+    });
+    Store.saveProducts(products);
+    showToast('商品已添加');
+  }
+
+  closeModal();
+  render();
+};
+
+/* ========================================
+   Modal: Confirm Delete
+   ======================================== */
+function renderConfirmModal(data) {
+  // data is passed as a string from onclick, we need to parse it
+  // Actually we handle this differently - see openModal calls
+  return `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h3 class="modal-title">确认删除</h3>
+          <button class="modal-close" onclick="closeModal()">${Icons.x}</button>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-body">
+            ${Icons.warning}
+            <p>确定要删除${data && data.label ? ' ' + escapeHtml(data.label) : ''}吗？</p>
+            <p class="confirm-sub">此操作不可恢复</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+          <button class="btn btn-danger" id="confirm-delete-btn">删除</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Override openModal for confirmDelete to handle data properly
+const _originalOpenModal = openModal;
+openModal = function(type, data) {
+  if (type === 'confirmDelete' && typeof data === 'object') {
+    state.modal = { type, data };
+    const root = document.getElementById('modal-root');
+    root.innerHTML = renderConfirmModal(data);
+    const deleteBtn = document.getElementById('confirm-delete-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        handleDelete(data.type, data.id);
+      });
+    }
+    return;
+  }
+  state.modal = { type, data };
+  renderModal();
+};
+
+function handleDelete(entityType, id) {
+  if (entityType === 'order') {
+    const orders = Store.getOrders().filter(o => o.id !== id);
+    Store.saveOrders(orders);
+    showToast('订单已删除');
+  } else if (entityType === 'customer') {
+    // Check if customer has orders
+    const orders = Store.getOrders();
+    const hasOrders = orders.some(o => o.customerId === id);
+    if (hasOrders) {
+      showToast('该客户存在关联订单，无法删除', 'error');
+      closeModal();
+      return;
+    }
+    const customers = Store.getCustomers().filter(c => c.id !== id);
+    Store.saveCustomers(customers);
+    showToast('客户已删除');
+  } else if (entityType === 'product') {
+    // Check if product has orders
+    const orders = Store.getOrders();
+    const hasOrders = orders.some(o => o.items.some(it => it.productId === id));
+    if (hasOrders) {
+      showToast('该商品存在关联订单，无法删除', 'error');
+      closeModal();
+      return;
+    }
+    const products = Store.getProducts().filter(p => p.id !== id);
+    Store.saveProducts(products);
+    showToast('商品已删除');
+  }
+  closeModal();
+  render();
+}
+
+/* ========================================
+   Export Handler
+   ======================================== */
+window.handleExport = function() {
+  showToast('已导出成功', 'success');
+};
+
+/* ========================================
+   Initialize
+   ======================================== */
+seedData();
+render();
+
+</script>
+</body>
+</html>
