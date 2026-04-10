@@ -1,8 +1,8 @@
 # 横向对比：mano-afk vs pm-cockpit（同一 PRD，实测数据）
 
 > 测试项目：轻量级订单管理系统
-> 对比日期：2026-04-10（最后更新：14:26）
-> 数据来源：两个 GitHub repo 全量文件 + commit 时间线 + 测试报告 + 执行日志 + REVIEW.md
+> 对比日期：2026-04-10（最后更新：15:35）
+> 数据来源：两个 GitHub repo 全量文件 + commit 时间线 + 测试报告 + 执行日志 + REVIEW.md + mano-cua 源码
 
 ### 线上版本
 
@@ -124,15 +124,33 @@ pm-cockpit 版本代码审查确认**同类问题不存在**：
 | 边界场景 | 空状态/表单验证/localStorage 异常（全覆盖） | 对抗审查（删除保护/碰撞/时区） |
 | 未覆盖 | 无（3 条 BLOCKED 已补测通过） | Visual 跳过 + 2 个环境 Bug 未检出 |
 
-### 4.4 过程可审计性
+### 4.4 测试执行独立性
+
+| 维度 | pm-cockpit | mano-afk |
+|------|-----------|---------|
+| **数据初始化** | ✅ 6 个 fixture JSON 预设已知状态 | ❌ 无初始化，refresh 不清 localStorage |
+| **测试独立性** | ✅ 每条基于已知 fixture 状态 | ❌ 状态串联累积，后续测试依赖前序结果 |
+| **浏览器生命周期** | Pre-flight 检查窗口状态 | 同一 Chrome 标签页全程复用，不关闭 |
+| **数据可复现性** | ✅ 同 fixture 跑 = 同结果 | ❌ 依赖执行顺序，换序可能不同结果 |
+
+**技术细节（mano-cua 源码验证）：**
+- 每条 E2E 指令以 `"If the page is already open, refresh it first"` 开头，但 refresh 只重新加载页面，不清空 localStorage
+- `_open_url()` 底层调用 `subprocess.Popen(["open", url])`（macOS），Chrome 已有标签页则复用
+- session 结束时 `_close_session()` 只关闭服务端 session，不关闭浏览器
+- **18 条 session 在同一 Chrome 标签页上串行执行，数据状态逐条累积**
+
+**对轨迹数据质量的影响：**
+- pm-cockpit 每条轨迹是「已知初态 → 操作 → 已知终态」，可独立验证
+- mano-afk 每条轨迹的初态取决于前序测试的终态，不可独立验证
+- 从 CUA 模型训练角度：mano-afk 的轨迹更接近真实用户行为（用户也不会每次清数据），但可复现性差
+
+### 4.5 过程可审计性
 
 | 维度 | pm-cockpit | mano-afk |
 |------|-----------|---------|
 | 轨迹可追溯到 PRD | ✅（mosstid → 测试点 → AC） | ❌ |
 | 执行规范合规 | ✅（14 条规范逐条检查） | ❌ |
 | 人工审核友好度 | ✅（fixture 已知、expected result 逐条列） | 🟡 |
-
-**核心洞察：mano-afk 的 QA 盲区是「环境相关 Bug」（时区、渲染）。功能逻辑层面够用，环境层面不够。**
 
 ---
 
@@ -189,6 +207,7 @@ pm-cockpit 版本代码审查确认**同类问题不存在**：
 - PRD 高质量 → 应用首版零 Bug
 - 22/22 测试 100% 通过
 - mosstid 完整追溯链 + 执行规范合规
+- fixture 保证测试独立性和可复现性
 - 项目复盘机制（REVIEW.md）→ 流程持续改进
 - **适合：Eval 数据集、论文级数据、需要精确追溯的场景**
 
@@ -197,14 +216,15 @@ pm-cockpit 版本代码审查确认**同类问题不存在**：
 - 应用多样性无上限
 - 自我进化（rules.md +9 条）
 - 对抗审查发现深层 Bug
+- 天然产出 Golden + Buggy 配对轨迹
 - **适合：批量铺覆盖、场景多样性扩展、快速迭代**
 
 ### 双通道架构
 
 ```
-                  ┌─ pm-cockpit（精品）─→ 20 sessions/app ─→ 高质量、可追溯
+                  ┌─ pm-cockpit（精品）─→ 20 sessions/app ─→ 高质量、可追溯、可复现
 需求池 ─→ 分发 ─→│
-                  └─ mano-afk（量产） ─→ 18 sessions/app ─→ 高速度、高多样性
+                  └─ mano-afk（量产） ─→ 18 sessions/app ─→ 高速度、高多样性、含Buggy
                                                     ↓
                                             统一 Layer 2 管线
                                      （格式对齐 → Gate 1 → 人工审核）
@@ -219,3 +239,4 @@ pm-cockpit 版本代码审查确认**同类问题不存在**：
 3. **批量稳定性**：连续跑 5 个不同需求
 4. **QA 盲区补强**：加 headless 截图验收环节
 5. **PRD 质量对齐实验**：给 mano-afk 喂 pm-cockpit 级 PRD
+6. **测试独立性改进**：mano-afk 每条测试前加 localStorage 重置或 fixture 注入
